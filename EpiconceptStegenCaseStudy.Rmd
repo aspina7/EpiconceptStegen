@@ -1,0 +1,183 @@
+---
+title: "Stegen case study: Are you confused or ready to interact when eating Tiramisu and drinking beer?"
+output: worded::rdocx_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r, echo = F, warning= F, message= F}
+#load packages
+  #Those required for creating this markdown: 
+    #"Worded": for styling and pagebreaks
+    #"knitr": for styling tables
+required_packages <- c("worded", "knitr") 
+
+for (i in seq(along = required_packages)) {
+  library(required_packages[i], character.only = TRUE)
+}
+```
+
+
+
+<!---CHUNK_PAGEBREAK--->
+
+# Copyright and License 
+
+**Source:** 
+
+This case study was first designed by Alain Moren and Gilles Desve, EPIET. It is based on an investigation conducted by Anja Hauri, RKI, Berlin, 1998
+
+
+Minor revisions were brought to this case study by IntoEpi 2009,2010, Hong Kong 2016
+It was then translated in to *R* by Alexander Spina in 2018. 
+
+**Revisions:** 
+
+*If you modify this case study, please indicate below your name and changes you made*  
+
+**You are free:** 
+
+- **to Share** — to copy, distribute and transmit the work 
+- **to Remix** — to adapt the work 
+
+**Under the following conditions:** 
+
+- **Attribution** — 	You must attribute the work in the manner specified by the author or licensor (but not in any way that suggests that they endorse you or your use of the work). The best way to do this is to keep as it is the list of contributors: sources, authors and reviewers. 
+- **Share Alike** — 	If you alter, transform, or build upon this work, you may distribute the resulting work only under the same or similar license to this one. Your changes must be documented. Under that condition, you are allowed to add your name to the list of contributors. 
+- You cannot sell this work alone but you can use it as part of a teaching. 
+
+**With the understanding that:** 
+
+- **Waiver** — Any of the above conditions can be waived if you get permission from the copyright holder. 
+- **Public Domain** — 	Where the work or any of its elements is in the public domain under applicable law, that status is in no way affected by the license. 
+- **Other Rights** — In no way are any of the following rights affected by the license: 
+  - Your fair dealing or fair use rights, or other applicable copyright exceptions and limitations; 
+  - The author's moral rights; 
+  - Rights other persons may have either in the work itself or in how the work is used, such as publicity or privacy rights. 
+- **Notice** — 	For any reuse or distribution, you must make clear to others the license terms of this work by keeping together this work and the current license. 
+
+
+This licence is based on http://creativecommons.org/licenses/by-sa/3.0/
+
+<!---CHUNK_PAGEBREAK--->
+
+# Objectives 
+
+At the end of the case study, using *R* for stratified analysis and logistic regression, participants should be able to analyse data from a food borne outbreak investigation and to sort out the respective roles played by several food vehicles. 
+
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+# Introduction 
+
+## Session 1 
+
+On 26 June 1998 the St Sebastian High School in Stegen, Germany, celebrated the graduation from school by organising a party to which 250 to 350 participants were expected. Attendants included graduates from St Sebastian High School, their families and friends, teachers, 12th grade students and some graduates from the nearby Marie-Curie school of Kirchzarten.  
+
+A self service party buffet was supplied by a commercial caterer from Freiburg.
+Food was prepared the day of the party and transported in a refrigerated van to the school.  
+
+Festivities started with a dinner buffet open from 8.30 pm and followed by a dessert buffet offered from 10 pm. The party and the buffet extended late during the night and alcoholic beverages were quite popular. All agreed it was a party to be remembered. 
+
+
+## The alert 
+
+On 2nd July 1998, the Freiburg Health office of the Federal Council Office of Breisgau-Hochschwarzwald reported to the Robert Koch Institute (RKI) in Berlin the occurrence of many cases of gastroenteritis following the graduation party described above. More than 100 cases were suspected among participants and some of them were admitted to nearby hospitals. Sick people suffered from fever, nausea, diarrhoea and vomiting lasting for several days. Most believed that the tiramisu consumed at dinner was responsible for their illness.
+Salmonella Enteritidis was isolated from 19 stool samples. 
+
+The Freiburg health office sent a team to investigate the kitchen of the caterer. Food preparation procedures were reviewed. Food samples, except tiramisu (none was left over), were sent to the laboratory of Freiburg University. Microbiological analyses were performed on samples of the following: brown chocolate mousse, caramel cream, remoulade sauce, yoghurt dill sauce, and 10 raw eggs.  
+
+The Freiburg health office requested help from the RKI in the investigation to assess the magnitude of the outbreak and identify potential vehicle(s) and risk factors for transmission in order to better control the outbreak.
+
+Cases were defined as any person attending the party at St Sebastian High School who suffered from diarrhoea (>= 3 loose stool for 24 hours) between 27 June and 29 June 1998; or who suffered from at least three of the following symptoms: vomiting, fever>= 38.5 ° C, nausea, abdominal pain, headache.
+
+Students from both schools attending the party were asked through phone interviews to provide names of persons who attended the party. 
+Overall 291 responded to enquiries and 103 cases were identified (Attack rate = 35%). Among these cases, 84 received medical treatments and four were admitted to hospitals. Attack rates by age group were 36.6% for persons < 20 years, 32.1% for persons 20 to 29 years, and 36.8% for persons older than 29 years. 
+
+![](IntroCurve.png)
+
+
+## Q1. In order to prepare your analysis, summarise the above information and formulate hypotheses to be tested. (5 min discussion) 
+
+
+
+<!---CHUNK_PAGEBREAK--->
+
+The shape of the epidemic curve, the attendance to a single event (a buffet) pointed towards a food borne outbreak related to a point common source of infection.
+
+Using the updated list of attendants, a retrospective cohort study including all attendants to the party (that could be reached) was conducted. All had received a standard questionnaire asking for demographic information, signs, symptoms and duration, admission to hospital, and food and beverages consumption at the party including amount consumed. Food specific attack rates were computed for more than 50 food items and beverages. 
+
+## Q2. Establish a plan of analysis. (10 min discussion)
+
+
+<!---CHUNK_PAGEBREAK--->
+
+## Help task 2 
+
+**Perform data cleaning** 
+
+- For each variable, look at range, unexpected values, missing values. 
+- Correct data using original forms if needed 
+
+**Describe each variable** 
+
+- For each variable, describe frequency distributions including missing values  and if needed means, median, modes, quartiles, SD, outliers 
+- Make appropriate histograms and box plots 
+- Choose relevant characteristics to describe the population 
+
+**Identify the outbreak vehicle if any** 
+
+- Chose the appropriate measure of association (RR, RD or OR) 
+- Chose the appropriate statistical tests and appropriate level of confidence 
+- Compute food specific attack rates 
+- Look at proportion of cases exposed 
+- Compute attributable risk % among exposed 
+- Search for any dose response if appropriate 
+- Interpret the results 
+
+**Do a stratified analysis** 
+
+- Identify the variables that are potential effect modifiers (EM) and confounders 
+- Design appropriate stratification tables 
+- Stratify on each level taken by the EM and confounders 
+- Compute appropriate measurements to identify confounding and effect modification 
+- Apply appropriate statistical tests 
+- Interpret the results 
+
+**Do a multivariable analysis** 
+
+- Prepare the data set for the multivariable analysis 
+- Identify numerical, nominal, discrete, continuous variables and decide how to analyse them 
+- Create additional variables as needed (age groups, dummy variables, etc.) 
+- Recode as necessary 
+- Add variables one by one 
+- Check for confounding and interaction 
+- Select a final model 
+
+## Q3. Check and clean the dataset “stegen.dta”. Create labels where appropriate.
+
+Verify your working directory and open stegen.dta. The data set “stegen.dta” includes the following variables:
+
+
+```{r, echo = F}
+
+kable(read.csv("IntroTable.csv", sep = ";" , 
+                    stringsAsFactors = FALSE ))
+
+```
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help task 3 
+
+Describe your dataset: frequency distributions, means, median, modes, quartiles, SD, quartiles, outliers. 
+Make appropriate histograms and box plots. 
+
+
+
+
