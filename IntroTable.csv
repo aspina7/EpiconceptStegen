@@ -1,0 +1,21 @@
+Variable name;Type;Stata code;Definition
+ill;Dichotomous;1=Yes, 0=No ;Case Y/N
+dateonset;Date;;Date of onset of illness
+sex;Dichotomous;1=Man, 0=Woman ;Gender
+age (years);Continued  (can be transformed into categories);;Age in years
+tira;Dichotomous;1=Yes, 0=No;Consumption of tiramisu Y/N
+tportion;Categorical (Four categories);"4 categories 0: none ; 1=one portion, 2=two portions,3=three portions";Amount of portions of tiramisu consumed
+wmousse;Dichotomous;1=Yes, 0=No;Consumption of white chocolate mousse Y/N
+dmousse;Dichotomous;1=Yes, 0=No;Consumption of dark chocolate mousse
+mousse;Dichotomous;1=Yes, 0=No;Consumption of chocolate mousse
+mportion;Categorical;4 categories 0=none, 1=one 2=two portions, 3=three portions....;Amount of portions of mousse consumed
+beer;Dichotomous;1=Yes, 0=No;Consumption of beer
+redjelly;Dichotomous;1=Yes, 0=No;Consumption of red jelly
+fruitsalad;Dichotomous;1=Yes, 0=No;Consumption of fruit salad
+tomato;Dichotomous;1=Yes, 0=No;Consumption of tomato
+mince;Dichotomous;1=Yes, 0=No;Consumption of minced meat
+salmon;Dichotomous;1=Yes, 0=No;Consumption of salmon
+horseradish;Dichotomous;1=Yes, 0=No;Consumption of horseradish
+chickenwin;Dichotomous;1=Yes, 0=No;Consumption of chicken wings
+roastbeef;Dichotomous;1=Yes, 0=No;Consumption of roastbeef
+pork;Dichotomous;1=Yes, 0=No;Consumption of pork
