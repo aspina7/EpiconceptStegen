@@ -6,6 +6,11 @@
 # Esther Kissling - Gilles DESVE
 # R-code written by Alexander Spina September 2018
 
+
+#### Answers to question 3: data checking 
+
+
+
 #### Setting your working directory ####
 
 #Check your current working directory
@@ -132,3 +137,7 @@ hist(tira.data$age,
      breaks = 100,
      xlim = c(0, 100)
 )
+
+# save histogram of age as a png file
+dev.copy(png,'age.png')
+dev.off()
