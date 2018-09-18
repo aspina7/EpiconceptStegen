@@ -175,9 +175,313 @@ kable(read.csv("IntroTable.csv", sep = ";" ,
 
 ## Help task 3 
 
-Describe your dataset: frequency distributions, means, median, modes, quartiles, SD, quartiles, outliers. 
+Describe your dataset: frequency distributions, means, median, modes, quartiles, SD, outliers. 
 Make appropriate histograms and box plots. 
 
+
+
+### Setting your working directory
+
+You can check the path for your current working directory using the *getwd* function.
+
+```{r, eval = F}
+#Check your current working directory
+getwd()
+
+```
+
+To set your working directory you can use the *setwd* function. 
+
+```{r, eval = F}
+
+setwd("C:/Users/Username/Desktop/EpiconceptStegen")
+
+```
+
+
+
+### Reading in files
+
+Import the dataset from a comma seperated value (.csv) file using the *read.csv* function, storing it as a dataframe within *R* called *tira.data*.For a CSV file the separator is normally a comma (","), however depending on the language of your operating system this can also be other values, for example a semi-colon (";"). Here we also specify that we do not want to read in string (character or grouped variables as factors).
+
+```{r}
+tira.data <- read.csv("stegen.csv", sep = ";", stringsAsFactors = FALSE )
+```
+
+### Describe your dataset 
+
+For example: 
+
+```{r, eval = F}
+
+summary(tira.data) 
+table(tira.data$sex)
+table(tira.data$beer, useNA = "always") 
+summary(tira.data$age) 
+aggregate(tira.data$age, by = list(tira.data$sex), FUN = summary)
+prop.table( table( tira.data$ill) )
+```
+
+*Example: ill* 
+
+```{r, eval = F}
+
+#get counts of ill 
+  #save table as "counts"
+counts <- table(tira.data$ill) 
+
+#get proportions for counts table
+prop.table(counts)
+
+#you could also multiple by 100 and round to 2 digits
+round(prop.table(counts)*100, digits = 2)
+
+```
+
+*Example: sex* 
+
+
+```{r, eval = F}
+
+#get counts 
+  #save table as "counts"
+counts <- table(tira.data$sex) 
+
+#get proportions for counts table
+prop.table(counts)
+
+#you could also multiple by 100 and round to 2 digits
+round(prop.table(counts)*100, digits = 2)
+
+```
+
+It is also possible to use a custom function to pull these various lines of code together in a custom function. You do not need to understand this code at current. You can run this code below which saves the *big.table* function in your environment; then you can use it the same way any other function works. 
+
+
+```{r}
+# Function to make tables with counts, proportions and cumulative sum
+big.table <- function(vars, data, useNA = "no") {
+  # Create an empty list to hold the output of your loop
+  output <- list() 
+
+  # Apply big.table to each element of the object in vars. 
+    #In this loop, "var" is the indexing variable; any character can be used e.g. "i"
+  for (var in vars) {
+    # Within the [], 
+      # the item before the comma refers to rows 
+      # the item after the comma refers to columns
+  count <- table(data[ , var], useNA = useNA)
+  prop <- round(prop.table(count)*100, digits = 2)
+  cumulative <- cumsum(prop)
+  total <- t(rbind(count,
+              prop,
+              cumulative))
+    # assign the value of your tables (total) to the output list 
+      #(note: double square brackets "[[]]" are used to subset elements of a list)
+    output[[var]] <- total
+  }
+
+output
+    
+}
+  
+  
+```
+
+
+```{r}
+# specify the variable in quotations and the dataset to use
+big.table(var = "sex", data = tira.data)
+```
+
+
+
+*To show more than one table at a time:* 
+
+We could use the big.table function to show more than one table at a time.
+
+```{r, eval = F}
+
+# specify multiple vars using c()
+big.table(var = c("tira", "pork", "salmon"), data = tira.data)
+
+```
+
+
+*Describing continuous variable, example: age* 
+
+
+```{r}
+# use the aggregate function to group by sex
+  # sex must be as a list
+  # specify the function you would like to use (summary)
+aggregate(tira.data$age, by = list(tira.data$sex), FUN = summary)
+
+```
+
+
+*Histograms*: 
+
+A frequency plot is the default for *hist*. In order to plot each unique value of age on the x-axis, specify number of breaks (in this case 100 years); set the x-axis to match this.
+
+```{r, eval = F}
+
+#Plot a histogram of age
+  #you can specify a bar for each age with "breaks"
+  #you can set your x axis from 0-100 using "xlim"
+hist(tira.data$age, 
+  xlab = "Age",
+  ylab = "Count", 
+  breaks = 100,
+  xlim = c(0, 100)
+)
+
+```
+
+
+To have a nicer title: 
+```{r}
+#Plot a histogram of age
+  #you can specify a bar for each age with "breaks"
+  #you can set your x axis from 0-100 using "xlim"
+hist(tira.data$age, 
+  xlab = "Age",
+  ylab = "Count", 
+  breaks = 100,
+  xlim = c(0, 100), 
+  main = "Number of cases"
+)
+
+```
+
+
+To save you can plot, then use *dev.copy* to choose a file type and name; *dev.off* closes the connection. 
+
+```{r}
+#save histogram of age as a png file
+dev.copy(png,'age.png')
+dev.off()
+```
+
+If you believe that two age groups are identifiable you may want to create a new variable with two age classes (< 30 years and above). The following shows one way to do it:
+
+```{r}
+#create a binary variable for older than 30 years of age
+tira.data$agegroup <- ifelse(tira.data$age >= 30, 1, 0 )
+
+```
+
+```{r, eval = F}
+#check the age grouping 
+table(tira.data$agegroup)
+```
+
+The *str* function will provide an overview of which variable types are in your dataset. The *summary* function will give minimum, maximum, first and third quartiles as well as medians and means for variables which are not strings (characters). Each of these commands can be run for individual variables also. You can refer to an individual variable of a data set by using the **$**, for example, if you wanted to obtain a summary of the a numeric age variable, then you would write **summary(tira.data\$age)**.  
+
+```{r, eval=F}
+# str provides an overview of the number of observations and variable types
+str(tira.data$ill)
+
+# summary provides mean, median and max values of your variables (where applicable NAs)
+summary(tira.data$ill)
+
+```
+
+Codebook of the variables salmon, pork and horseradish show that a few records have the value 9. As in Q3 you are asked to clean these data, recode these values to missing.
+
+```{r}
+#for the rows where salmon is 9, overwrite with NA
+tira.data$salmon[tira.data$salmon == 9] <- NA
+
+#same for horseradish and pork
+tira.data$horseradish[tira.data$horseradish == 9] <- NA
+tira.data$pork[tira.data$pork == 9] <- NA
+
+```
+
+
+### Creating labels: 
+
+
+In order to add labels in *R* you have to change variables in to factors. This allows you to specify levels (the order in which categories appear in output) and then label these levels. 
+
+```{r}
+
+#re-write the tira variable as a factor defining levels and labels
+tira.data$tira <- factor(tira.data$tira, 
+                     levels = c(1, 0), 
+                     labels = c("Yes", "No")
+                     )
+
+
+#re-write the wmousse variable as a factor defining levels and labels
+tira.data$wmousse <- factor(tira.data$wmousse, 
+                     levels = c(1, 0), 
+                     labels = c("Yes", "No")
+                     )
+
+
+#re-write the dmousse variable as a factor defining levels and labels
+tira.data$dmousse <- factor(tira.data$dmousse, 
+                     levels = c(1, 0), 
+                     labels = c("Yes", "No")
+                     )
+
+```
+
+
+You can label more than one variable at a time using a for-loop 
+
+```{r}
+
+#define the variables you would like to recode
+vars  <- c("mousse", "beer", "redjelly", 
+           "fruitsalad", "tomato", "mince", 
+           "salmon", "horseradish", "chickenwin", 
+           "roastbeef", "pork") 
+
+#for each var defined in vars above
+for (var in vars) {
+  #select the column of tira.data in square brackets
+    #overwrite with a factor as above
+  tira.data[ , var] <- factor(tira.data[ , var], 
+                     levels = c(1, 0), 
+                     labels = c("Yes", "No")
+                     )
+}
+
+```
+
+And define different categories. 
+```{r}
+
+#define the variables you would like to recode
+vars  <- c("tportion", "mportion") 
+
+#for each var defined in vars above
+for (var in vars) {
+  #select the column of tira.data in square brackets
+    #overwrite with a factor as above
+  tira.data[ , var] <- factor(tira.data[ , var], 
+                     levels = c(0, 1, 2, 3), 
+                     labels = c("None", "One portion", 
+                                "Two portions", "Three portions")
+                     )
+}
+
+```
+
+
+### R-scripts
+
+You may also want to develop an R-script in which you will keep all relevant commands and annotate / comment each step of your analysis. 
+
+You can select the "+" icon and select R-script from the dropdown (alternatively you could click File > New file > R-script) , insert your command and save with a specific “name.R”. An example is shown below:
+
+
+![](Rscript.png)
+
+You may want to create separate scripts for checking the dataset and for recoding the data (cleaning and creating labels).
 
 
 
