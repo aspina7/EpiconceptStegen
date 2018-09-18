@@ -260,7 +260,7 @@ It is also possible to use a custom function to pull these various lines of code
 
 ```{r}
 # Function to make tables with counts, proportions and cumulative sum
-big.table <- function(vars, data, useNA = "no") {
+big.table <- function(vars, data, useNA = "always") {
   # Create an empty list to hold the output of your loop
   output <- list() 
 
@@ -288,6 +288,8 @@ output
   
 ```
 
+
+You can now use this function as any other function. 
 
 ```{r}
 # specify the variable in quotations and the dataset to use
@@ -326,9 +328,9 @@ A frequency plot is the default for *hist*. In order to plot each unique value o
 
 ```{r, eval = F}
 
-#Plot a histogram of age
-  #you can specify a bar for each age with "breaks"
-  #you can set your x axis from 0-100 using "xlim"
+# Plot a histogram of age
+  # you can specify a bar for each age with "breaks"
+  # you can set your x axis from 0-100 using "xlim"
 hist(tira.data$age, 
   xlab = "Age",
   ylab = "Count", 
@@ -341,9 +343,10 @@ hist(tira.data$age,
 
 To have a nicer title: 
 ```{r}
-#Plot a histogram of age
-  #you can specify a bar for each age with "breaks"
-  #you can set your x axis from 0-100 using "xlim"
+# Plot a histogram of age
+  # you can specify a bar for each age with "breaks"
+  # you can set your x axis from 0-100 using "xlim"
+  # main is where you set your title
 hist(tira.data$age, 
   xlab = "Age",
   ylab = "Count", 
@@ -357,8 +360,8 @@ hist(tira.data$age,
 
 To save you can plot, then use *dev.copy* to choose a file type and name; *dev.off* closes the connection. 
 
-```{r}
-#save histogram of age as a png file
+```{r, eval = F}
+# save histogram of age as a png file
 dev.copy(png,'age.png')
 dev.off()
 ```
@@ -366,13 +369,13 @@ dev.off()
 If you believe that two age groups are identifiable you may want to create a new variable with two age classes (< 30 years and above). The following shows one way to do it:
 
 ```{r}
-#create a binary variable for older than 30 years of age
+# create a binary variable for older than 30 years of age
 tira.data$agegroup <- ifelse(tira.data$age >= 30, 1, 0 )
 
 ```
 
 ```{r, eval = F}
-#check the age grouping 
+# check the age grouping 
 table(tira.data$agegroup)
 ```
 
@@ -483,5 +486,88 @@ You can select the "+" icon and select R-script from the dropdown (alternatively
 
 You may want to create separate scripts for checking the dataset and for recoding the data (cleaning and creating labels).
 
+<!---CHUNK_PAGEBREAK---> 
 
+
+## Q4. Describe the outbreak in terms of person and time
+
+Note: A “Place” variable is not available. Use the cleaned dataset stegen1.dta dataset.
+
+<!---CHUNK_PAGEBREAK---> 
+
+
+## Help task 4 
+
+```{r, eval = F}
+load("stegen1.Rda")
+big.table("sex", tira.data)
+summary(tira.data$age)
+big.table("agegroup", tira.data) 
+big.table("ill", tira.data) 
+big.table("dateonset", tira.data[tira.data$ill == 1, ])
+
+```
+
+### Key tables for task 4: 
+You can create these tables in Word or Excel from the data from the Stata output.
+
+**Table 1.  Descriptive epidemiology: Study population by sex**
+```{r, echo = F}
+kable( matrix( c(
+        "Sex",	"N",	"%",
+        "Male",	"152",	"48",
+        "Female",	"139",	"52",
+        "Total",	"291",	"100"
+), ncol = 3, byrow = T)
+)
+```
+  
+
+**Table 2.  Descriptive epidemiology: Study population by age group**
+```{r, echo = F}
+kable( matrix( c(
+        "Age group", "N",	"%",
+        "<30",	215,	74,
+        "30+",	68,	23,
+        "Missing",	8,	3,
+        "Total",	291,	100
+), ncol = 3, byrow = T)
+)
+```
+    
+**Mean age:** 26 years
+**Median age:** 20 years
+**Range:** 12 – 80 years
+ 
+**Table 3.  Descriptive epidemiology: Attack rate**
+```{r, echo = F}
+kable( matrix( c(
+        "Ill",	"N",	"%",
+        "No",	188,	65,
+        "Yes",	103,	35,
+        "Total",	291,	100
+), ncol = 3, byrow = T)
+)
+```
+ 
+ 
+**Table 4.  Descriptive epidemiology: Cases by date of onset of illness**
+```{r, echo = F}
+kable( matrix( c(
+        "Ill",	"N",	"%",
+        "27 June 1998",	48,	47,
+        "28 June 1998",	46,	45,
+        "29 June 1998",	8,	8,
+        "Missing",	1,	1,
+        "Total",	103,	100
+), ncol = 3, byrow = T)
+)
+```
+
+### Copying tables in to Excel: 
+To copy tables in to Excel, save your output as an object and can use the *View* function on your output data frame. Then highlight this from the bottom right to the top left, then copy and paste to Excel. 
+
+![](Copying.png)
+
+Alternatively if you could use the *write.csv* function to creat a CSV file and open this with Excel. 
 
