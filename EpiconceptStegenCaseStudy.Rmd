@@ -74,7 +74,7 @@ At the end of the case study, using *R* for stratified analysis and logistic reg
 
 # Introduction 
 
-## Session 1 
+# Session 1 
 
 On 26 June 1998 the St Sebastian High School in Stegen, Germany, celebrated the graduation from school by organising a party to which 250 to 350 participants were expected. Attendants included graduates from St Sebastian High School, their families and friends, teachers, 12th grade students and some graduates from the nearby Marie-Curie school of Kirchzarten.  
 
@@ -412,22 +412,22 @@ In order to add labels in *R* you have to change variables in to factors. This a
 
 #re-write the tira variable as a factor defining levels and labels
 tira.data$tira <- factor(tira.data$tira, 
-                     levels = c(1, 0), 
-                     labels = c("Yes", "No")
+                     levels = c(0, 1), 
+                     labels = c("No", "Yes")
                      )
 
 
 #re-write the wmousse variable as a factor defining levels and labels
 tira.data$wmousse <- factor(tira.data$wmousse, 
-                     levels = c(1, 0), 
-                     labels = c("Yes", "No")
+                     levels = c(0, 1), 
+                     labels = c("No", "Yes")
                      )
 
 
 #re-write the dmousse variable as a factor defining levels and labels
 tira.data$dmousse <- factor(tira.data$dmousse, 
-                     levels = c(1, 0), 
-                     labels = c("Yes", "No")
+                     levels = c(0, 1), 
+                     labels = c("No", "Yes")
                      )
 
 ```
@@ -448,8 +448,8 @@ for (var in vars) {
   #select the column of tira.data in square brackets
     #overwrite with a factor as above
   tira.data[ , var] <- factor(tira.data[ , var], 
-                     levels = c(1, 0), 
-                     labels = c("Yes", "No")
+                     levels = c(0, 1), 
+                     labels = c("No", "Yes")
                      )
 }
 
@@ -570,4 +570,286 @@ To copy tables in to Excel, save your output as an object and can use the *View*
 ![](Copying.png)
 
 Alternatively if you could use the *write.csv* function to creat a CSV file and open this with Excel. 
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+# Session 2
+
+## Q5. Understanding that investigators did a cohort study, test each of the relevant hypotheses.
+
+Using *R* and the cleaned dataset “stegen1.Rda”:
+
+**Q5a)** Compute food specific attack rates and attack rates by age and sex
+
+**Q5b)** Choose the appropriate measure of association and the appropriate statistical tests and appropriate level of confidence
+
+**Q5c)** Look at proportion of cases exposed
+
+**Q5d)** Compute attributable risk % among exposed
+
+**Q5e)** Search for any dose response if appropriate
+
+**Q5f)** Interpret the results and identify the outbreak vehicle if any.
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help task 5 
+
+### Help Q5a) Calculating attack rate: 
+
+There are several ways to do this. The first involves using base-R code, the second is with a user-written function and the third is to install a package. 
+
+```{r}
+#load your cleaned dataset
+load("stegen1.Rda")
+
+```
+```{r, eval = F}
+# The first element will be rows and the 2nd will be columns
+count <- table(tira.data$sex, tira.data$ill, deparse.level = 2)
+
+# Here we select row % of count by including ,1 in the prop.table section
+prop <- round(prop.table(count, 1) * 100, digits = 2)
+
+# We obtain the denominator using the rowSums function
+denominator <- rowSums(count)[2]
+
+# We combine all the elements together using cbind (binding by columns)
+output <- cbind(Ill = count[2, ], N = denominator, Proportions = prop[2, ])
+```
+
+
+You could alternatively combine the above code in to a user-written function called *attack.rate*. Here too, you do not need to understand this code at this point. 
+
+First run the code to save the function in your environment. 
+
+```{r}
+# Function to provide counts, denominator and proportions (equivalent of attack rate)
+attack.rate <- function(exposure, outcome, data, rowcol = "cols") {
+  
+  #create an empty list to store results
+  output <- list()
+  
+  #for each variable named in exposure
+  for (var in exposure) {
+  
+  counts <- table(data[, var], data[, outcome] )
+  
+  if (rowcol == "cols") {
+    
+    
+    #get column proportions
+    prop <- round(prop.table(counts, 1) * 100, digits = 2)
+    
+    #get row totals 
+    denominator <- rowSums(counts)[2]
+
+    
+    #pull counts together 
+    intermediate <- cbind(Ill = counts[2, ], N = denominator, Proportions = prop[2, ])
+    
+  }
+  
+  if (rowcol == "rows") {
+    
+    #get column proportions
+    prop <- round(prop.table(counts, 2) * 100, digits = 2)
+    
+    #get column totals
+    denominator <- colSums(counts)[2]
+    
+    #pull counts together 
+    intermediate <- cbind(Exposed = counts[ , 2], 
+                          N = denominator, Proportions = prop[ , 2])
+  }
+  
+  if (nrow(counts) > 2) {
+    
+    #get column proportions
+    prop <- round(prop.table(counts, 1) * 100, digits = 2)
+    
+    #get row totals 
+    denominator <- rowSums(counts)
+
+    
+    #pull counts together 
+    intermediate <- cbind(Ill = counts[ , 2], N = denominator, Proportions = prop[ , 2])
+    
+  }
+  
+  #store your output table in the list
+  output[[var]] <- intermediate
+  }
+  
+  return(output)
+}
+```
+
+You can now use your function to get attack rates. 
+
+```{r, eval = F}
+# specify the exposure, the outcome and the dataset
+attack.rate( exposure = "sex", outcome = "ill", data = tira.data)
+```
+
+
+Alternatively you could use the *EpiStats* package written by Epiconcept. 
+
+
+
+
+```{r, eval = F}
+# Install the package if you have not done this yet
+install.packages("EpiStats")
+```
+```{r}
+# Load the package to this session 
+library(EpiStats)
+```
+```{r, eval = F}
+
+# Use the CS function as this is a cohort study 
+CS(tira.data, "ill", "sex")
+
+```
+
+
+
+## Help Q5b) Choose the appropriate measure of association and the appropriate statistical tests and appropriate level of confidence
+
+As we are carrying out a cohort study, the appropriate measure of association is relative risk. The appropriate statistical test for determining a p-value is a Chi2 test of comparison of proportions. For our analyses we will use a 95% confidence level, as this is the standard used in public health.
+
+## Help Q5c) Look at proportion of cases exposed
+
+Here you could use the *attack.rate* function and specify that you would like rows. 
+
+```{r, eval = F}
+# specify rows to get proportion of exposed cases
+attack.rate(exposure = c("sex", "tira", "agegroup"), 
+            outcome = "ill", data = tira.data, 
+            rowcol = "rows")
+
+```
+
+Alternatively you could use the CS function and switch exposures and outcomes. 
+
+```{r, eval = F}
+#reversed cs gives you one count
+CS(tira.data, "tira", "ill")
+```
+
+We can see that many cases were exposed to Tiramisu. 
+
+```{r, echo = F}
+attack.rate(exposure = "tira", 
+            outcome = "ill", data = tira.data, 
+            rowcol = "rows")
+```
+
+
+## Help Q5d) Compute attributable risk % among exposed
+
+To calculate the attributable risk % among the exposed, we can use the formula: 
+
+
+$$AF_{exp}= \frac{RR-1}{RR} \times 100$$
+
+The attributable risk % is the proportion of the disease among the exposed, which can be attributed to the exposure (or could have been prevented by eliminating the exposure).
+We can also find the attributable risk % using the CS function: 
+
+```{r, eval = F}
+#same command as above for CS
+CS(tira.data, "tira", "ill")
+```
+
+
+
+```{r, echo = F}
+kable( matrix( c(
+        "Risk factor", "Attributable risk %",
+        "Agegroupagegroup",	5.1,
+        "Tiramisutiramisu",	94.5,
+        "wmousse",	64.9,
+        "dmousse",	77.8,
+        "mousse",	79.9,
+        "redjelly",	52.0,
+        "fruitsalad",	60.0,
+        "tomato",	22.5,
+        "mince",	5.4,
+        "salmon",	3.2,
+        "horseradish",	20.4,
+        "chickenwin",	13.9,
+        "pork",	20.1
+), ncol = 2, byrow = T)
+)
+```
+
+NB: It makes sense to calculate the attributable risk % among the exposed among those with a RR>1. If there is a protective effect (RR<1), then we can calculate the prevented fraction among the exposed: 
+$\frac{risk_{unexp} - risk_{exp}}{risk_{unexp}} \times 100 = (1-RR) \times 100$
+
+The prevented fraction among the exposed is mainly used in vaccine studies (where the exposure, the vaccine, is protective). In outbreak investigation studies, we rarely have protective exposure. We need to have verified biological plausibility for an exposure to be a risk factor, otherwise the calculation of the prevented fraction does not make sense.
+
+Here, there are three risk factors for getting ill that are associated with a RR<1: sex, beer and roastbeef. The epidemiologists in the outbreak investigation team decide to assess if drinking beer is protective in this outbreak. We can calculate the prevented fraction among the exposed (see below). For the variables sex and roastbeef, it may be harder to determine any plausible biological reasons for them to be protective factors. 
+
+```{r, echo = F}
+
+kable( matrix( c(
+        "Risk factor",	"Prevented fraction %",
+        "Beer",	32.3
+), ncol = 2, byrow = T)
+)
+
+```
+
+
+## Help Q5e) Search for any dose response if appropriate 
+
+Use the variable tportion and tabulate it. Consider whether you would recode this variable so it has fewer categories, and actually do it. 
+
+
+```{r}
+# Tabulate tportion variable against illness using attack.rate function
+attack.rate(exposure = "tportion", 
+            outcome = "ill", 
+            data = tira.data)
+```
+
+
+```{r}
+# Recode 3 portions of tportion as 2 portions
+# Make a new variable called tportion2 that has the same values as tportion
+tira.data$tportion2 <- tira.data$tportion
+tira.data$tportion2[tira.data$tportion2 == "Three portions"] <- "Two portions"
+
+#drop the resulting NA factor level
+tira.data$tportion2 <- droplevels(tira.data$tportion2, NA)
+```
+
+
+```{r}
+# Tabulate tportion2 variable against illness using attack.rate function
+attack.rate(exposure = "tportion2", 
+            outcome = "ill", 
+            data = tira.data)
+```
+
+Here you can see that those who ate 2 or more portions of Tiramisu have a higher attack rate than those that ate only 1 portion of tiramisu. Those who ate 1 portion of tiramisu have a higher attack rate than those who ate no tiramisu.
+
+## Help Q5f) Interpret the results and identify the outbreak vehicle if any.
+
+Use the *CSTable* function from the *EpiStats* package. The output is automatically sorted by p-value however you can also get choose to sort by other values. This can be useful when you would like a summary table of attack rates and RRs. 
+
+```{r}
+#use the same commands as for CS
+CSTable(tira.data, cases = "ill", exposure = c("sex", "agegroup", "tira",
+                                               "beer", "mousse", "wmousse",
+                                               "dmousse", "redjelly", "fruitsalad",
+                                               "tomato", "mince", "salmon", "horseradish",
+                                               "chickenwin", "roastbeef", "pork"))
+```
+
+
+
 
