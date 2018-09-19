@@ -851,5 +851,121 @@ CSTable(tira.data, cases = "ill", exposure = c("sex", "agegroup", "tira",
 ```
 
 
+<!---CHUNK_PAGEBREAK---> 
+
+# Session 3
+
+**Ppt Presentation: **
+**Summary of results for food specific attack rates (10 minutes)**
+
+Several food items seem to play a role in the occurrence of illness; tiramisu, dark and white chocolate mousse, fruit salad, and red jelly. They can potentially explain up to respectively (94, 76, 49, 46, and 45 of the 103 cases). Investigators decided to identify their respective role in the occurrence of illness.
+
+From the crude analysis epidemiologists noticed that the occurrence of gastroenteritis was lower among those attendants who had drunk beer. They also decided to assess if beer had a protective effect on occurrence of gastroenteritis.
+
+
+## Q6. Conduct any relevant stratified analysis, using the dataset stegen1.dta.
+
+**Q6a)** Identify the variables which are potential effect modifiers and confounders: Start by looking if beer is an effect modifier or a confunder, look at the 2X2 tables
+
+**Q6b)** Use the cs command
+
+**Q6c)** To summarize your results, use csinter command
+
+**Q6d)** Then design all appropriate stratification tables
+
+**Q6e)** Stratify on each level taken by the effect modifiers and confounders and compute appropriate measurements to identify confounding and effect modification.
+
+**Q6f)** Interpret the results
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help Task 6 
+
+## Help Q6a) Identify the variables which are potential effect modifiers and confounders: Start by looking if beer is an effect modifier or a confounder, look at the 2X2 tables. 
+
+Do a tabulation to show the 2 by 2 tables of each stratum.
+
+```{r}
+
+# do a three way table with tira
+# drop NAs specifying useNA = "no" 
+# put variable names using deparse.level = 2
+table(tira.data$beer, tira.data$ill, 
+      tira.data$tira, useNA = "no",
+      deparse.level = 2)
+
+```
+
+## Help Q6c) To summarize your results, use csinter function:
+
+Use the *CSInter* function to summarise. The *CSInter* function  produces 2 x 2 tables with stratum specific risk ratios, attributable risk among exposed and population attributable risk.
+
+As a summary it gives the Mantel Haenszel RR and the result of a Woolf test for homogeneity.
+
+
+```{r, eval = F}
+
+# specify CSInter as otherwise, but also choose a by group
+CSInter(tira.data, cases = "ill", exposure = "beer", by = "tira")
+```
+
+
+## Help Q6d) Then design all appropriate stratification tables 
+
+Other potential variables include: 
+- Dark chocolate mousse 
+- White chocolate mousse 
+- Beer 
+- Red jelly 
+- Fruit salad 
+- Age 
+- Sex 
+- Amount of Tiramisu eaten 
+
+## Help Q6e) Stratify on each level taken by the effect modifiers and confounders and compute appropriate measurements to identify confounding and effect modification. 
+
+
+```{r, echo = F}
+
+kable( matrix( c(
+        "",	"RR stratified for Tiramisu (Yes|No)", 
+        "M-H Test for homogeneity (p-value)", "Crude RR", "Adjusted (MH-RR)", 
+        "% change", "Eff.mod or conf?", 
+        
+        "White mousse", "", "", "", "", "", "",
+        "Dark mousse", "", "", "", "", "", "",
+        "Beer", "", "", "", "", "", "",
+        "Red jelly", "", "", "", "", "", "",
+        "Fruit salad", "", "", "", "", "", "",
+        "Sex", "", "", "", "", "", "",
+        "Age", "", "", "", "", "", ""
+), ncol = 7, byrow = T)
+)
+
+```
+
+
+By stratifying the analysis on tiramisu consumption we can measure the potential protective role of beer among those who ate tiramisu. The following tables show occurrence of gastroenteritis according to beer and tiramisu consumption. 
+
+
+**Table 5** Cases of gastroenteritis among attendants at a high school graduation ceremony by beer and tiramisu consumption, Stegen, Germany, 1998.
+
+```{r, echo = F}
+
+kable(CSInter(tira.data, cases = "ill", exposure = "beer", by = "tira")$df1)
+
+
+```
+
+
+It seems that consumption of beer may reduce the relative effect of tiramisu consumption on occurrence of gastroenteritis. The RR does not significantly differ in the two strata (0.8 vs. 1.0 and confidence intervals overlap). But some effect modification may be present. This association between beer consumption and occurrence of gastroenteritis is however not confounded by Tiramisu consumption since the adjusted RR is 0.8 and the crude RR was 0.7. A similar stratification was conducted assessing dose response for tiramisu consumption among beer drinkers and not. 
+
+
+```{r, echo = F}
+
+kable(CSInter(tira.data, cases = "ill", exposure = "beer", by = "tportion2")$df1)
+
+```
+
 
 
