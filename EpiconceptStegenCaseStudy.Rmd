@@ -968,4 +968,463 @@ kable(CSInter(tira.data, cases = "ill", exposure = "beer", by = "tportion2")$df1
 ```
 
 
+<!---CHUNK_PAGEBREAK---> 
 
+# Session 4
+
+**Case study continued** 
+Results suggest that dark and white chocolate as well as fruit salad and red jelly consumption may have contributed to illness (since RR are high even among those who did not eat tiramisu). Such an association can be real (several contaminated food items, use of a single spoon to serve portions) or due to another unidentified confounding factor.  Interpretation of results should also be cautious due to the small number of cases involved in this stratified analysis. 
+
+## Q7. Conduct a multivariable analysis without taking interaction into account. 
+
+**First explore the result of logistic regression** 
+
+- Start with the logit command 
+- Include one exposure variable (the most likely vehicle = tiramisu, outcome = ill) 
+- Look at the coefficients obtained from the logistical regression. With beta, compute the OR with a calculator and compare with output provided by *R*.
+
+**Then add the other variables in the logistic regression** 
+
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help task 7 
+
+**Perform logistic regression** 
+
+- Include one exposure variable (the most likely vehicle = tiramisu, outcome = ill) 
+- Look at the coefficients obtained from the logistical regression. With beta, compute the OR with a calculator and compare with output provided by *R* 
+- Compare the univariable analysis results obtained from a 2 x 2 table and those obtained from the logistic regression with one exposure variable. 
+- Repeat the process for each variable of interest.
+
+
+Start by running a logistic regression. Using the **generalised linear model** (glm) function with the **logit link** will provide output.    
+
+```{r}
+# Create logit regression model with tira as exposure variable
+
+model1 <- glm(ill~tira,
+              data = tira.data,
+              family = binomial(link = "logit"))
+
+# Gives an overview of key elements of the model
+summary(model1)
+```
+
+
+The odds ratio is equal to the exponential of the coeffecient. In order to get this output it is possible to use the *tidy* function from the *broom* package. 
+
+```{r, eval = F}
+# install broom if you have not already done so
+install.packages("broom")
+```
+
+
+
+```{r, message = FALSE}
+#load broom to this session 
+library(broom)
+
+# Obtaining the key output of the regression model including ORs and CIs
+model1op <- tidy(model1, exponentiate = TRUE, conf.int = TRUE)
+
+# view your cleaned output
+model1op
+```
+
+
+**Then** 
+
+- Add a second variable 
+
+
+```{r, message = FALSE}
+# We add beer to the model
+model2 <- glm(ill ~ tira + beer,
+              data = tira.data,
+              family = binomial(link = "logit"))
+
+# clean up your output and exponentiate
+model2op <- tidy(model2, exponentiate = TRUE, conf.int = TRUE)
+
+# view your cleaned output
+model2op
+```
+
+
+For categorical variables, *R* will automatically take the lowest value as the reference category. Try this with tportion.
+
+
+```{r, message = FALSE}
+# Here we specify that tportion is a factor variable
+model3 <- glm(ill~tportion, 
+              data = tira.data,
+              family = binomial(link = "logit"))
+
+# clean up your output and exponentiate
+model3op <- tidy(model3, exponentiate = TRUE, conf.int = TRUE)
+
+# view your cleaned output
+model3op
+```
+
+
+We can however change the reference level (for example use 3 portions instead of 0).  
+*NB*: reference designates the index and not the value.
+
+```{r, eval = F}
+tira.data$tportion <- relevel(tira.data$tportion, ref = "Three portions")
+```
+
+**Add more variables?** 
+
+We add mousse to the previous model. 
+To simplify matters, we can use the **update** function. In this way, we retain the dataset and family from the previous model and just have to specify the variables to include in the formula.  
+```{r, message=FALSE}
+
+# Update the previous model with a new formula
+model4 <- update(model2,
+                 formula = ill ~ tira + beer + mousse)
+
+#clean and exponentiate
+model4op <- tidy(model4, exponentiate = TRUE, conf.int = TRUE)
+
+#view
+model4op
+```
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Q8. optional: As we are carrying out a cohort study, our measure of effect of choice is the relative risk. Try binomial regression to directly estimate relative risk instead of odds ratio. 
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help Q8 
+
+To specify binomial regression use the *glm* command and choose log as a link rather than logit.
+```{r, message=FALSE}
+# Binomial regression with one independent variable
+  #specify link as log rather than logit
+bin1 <- glm(ill ~ tira, 
+            data = tira.data,
+            family = binomial(link = "log"))
+
+#clean output and exponentiate
+bin1op <- tidy(bin1, exponentiate = TRUE, conf.int = TRUE)
+
+#view 
+bin1op 
+```
+
+Binomial regression estimates risk ratios. The risk ratio here for tiramisu is 18. The odds ratio is 79.
+
+```{r, echo = F}
+#show table to participants but not this code
+model1op
+```
+
+The odds ratio greatly overestimates the risk ratio in this study. In a cohort study, the odds ratio is close to the relative risk only when the incidence of the outcome of interest is low. In this study, the overall attack rate is 35.4%, which is a high incidence; therefore we see a very big difference between the odds ratio and the relative risk. 
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Q9. optional: As it is not straightforward to use the lrtest with binomial regression, use logistic regression to carry out the likelihood ratio test to test between different models. 
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help task 9: Testing between two models 
+
+So far we have tested if a model with n variables significantly contributed to the probability of illness. Apart from the first variable we did not check if the addition or the drop of one variable significantly contributed to the outcome.
+
+It is possible to compare two models. 
+However they need to have the same number of observations. This is why in “stegen_nomissing.Rda” we have deleted all observations with missing values. We now work with 239 observations instead of 291. (This could also be done from the original data set by deleting all observations with missing values). If we wanted to any missings from all variables we could use the *na.omit* funciton; however as we want to specify variables, we need to use the *complete.cases* function.
+
+```{r}
+#drop rows with missing values
+tira.data <- tira.data[complete.cases(tira.data[ , c("ill", "tira", "age", 
+                                                     "dmousse", "wmousse", "beer", 
+                                                     "fruitsalad", "redjelly", "tportion", 
+                                                     "mportion", "salmon", "mince", 
+                                                     "tomato", "horseradish", "chickenwin", 
+                                                     "roastbeef", "pork")]
+                                      ) , ]
+```
+
+
+
+
+
+
+The following method can now be applied.
+Using “stegen_nomissing.Rda”, do a first model with the outcome (ill) and one exposure (tira). 
+
+
+
+
+```{r, message=FALSE}
+# Only one independent variable
+model5 <- glm(ill~tira,
+                 data = tira.data,
+                 family = binomial(link = "logit"))
+
+model5op <- tidy(model5, exponentiate = TRUE, conf.int = TRUE)
+model5op
+```
+
+Now do a second model with one additional variable (beer). 
+
+```{r, message=FALSE}
+# As before, we can update the previous model and just write the new formula
+model6 <- update(model5, 
+                    formula = ill ~ tira + beer)
+
+model6op <- tidy(model6, exponentiate = TRUE, conf.int = TRUE)
+model6op
+```
+
+To compare two models, we will use the **anova** test, which tests for the difference in the residual deviances between the models. This is equivalent to a likelihood ratio test.   
+
+```{r, message=FALSE}
+anova(model5, model6, test = "Chisq")
+```
+
+
+If the anova test is statistically significant, this suggests that the addition of beer in the model significantly improves the residual deviance of this model. 
+
+The results of the anova (p = 0.0590) suggest a borderline significance (at the 0.05 level) for the addition of the variable beer. Remember this might be a confounder, so this may be a sufficient reason for which you may want to keep it in the model regardless of its p-value in the anova test. For the OR for beer we would therefore decide to keep beer in the model.
+
+Then extend to other variables. Proceed similarly to extend or drop the model according to the anova results.
+
+Keep or drop other variables as needed.
+Take anova, p-values, magnitude of OR, and the proportion of cases exposed into account in order to decide.
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Q10. Using the likelihood ratio test keep adding variables and testing if they contribute significantly to the model. You can use the table on the next page for this. (optional) 
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+You can use a table similar to the following one to design your model.
+
+```{r, echo = F}
+
+kable( matrix( c(
+        "Models",	"Const.", "Tira (OR)", "p-value", "Beer (OR)", "p-value", 
+        "Mousse (OR)", "p-value", "Sex (OR)", "p-value", "Log likelihood", 
+        "ANOVA (with previous model)", 
+        
+        "1", "", "", "", "", "", "", "", "", "", "", "",
+        "2", "", "", "", "", "", "", "", "", "", "", "",
+        "3", "", "", "", "", "", "", "", "", "", "", "",
+        "4", "", "", "", "", "", "", "", "", "", "", "",
+        "5", "", "", "", "", "", "", "", "", "", "", "",
+        "6", "", "", "", "", "", "", "", "", "", "", "",
+        "7", "", "", "", "", "", "", "", "", "", "", ""
+), ncol = 12, byrow = T)
+)
+
+
+```
+
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+In addition the **glht** function from the **multcomp** package, if typed after the logistic command, will give you the constant term for the entire model (linear combinations). It reflects the odds of disease when all exposures are equal to 0 (note that here the OR is not the OR for the constant but the odds of disease when not exposed to any of the factors).
+
+
+
+
+**Additional** 
+In order to predict probability of outcome according to specific exposures you can use the following predict command:
+
+
+```{r}
+
+model7 <- glm(ill ~ sex + tportion + mousse + beer + fruitsalad + 
+                redjelly + tomato + mince + salmon + horseradish + 
+                chickenwin + roastbeef + pork + age,
+                 data = tira.data,
+                 family = binomial(link = "logit"))
+
+
+predict(model7, type = "response")
+```
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Q11. Repeat the multivariable analysis including the relevant interactions (optional). Use stegen_nomissing.Rda
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+## Help task 11: Look for effect modification 
+
+To check for interaction *R* requires that an equal number of non-missing values are available for each variable included.
+
+In “stegen_nomissing.Rda” the data set was restricted to 239 observations for which the information on variable of interest is available.
+
+Using “stegen_nomissing.Rda” test for interaction between consumption of beer and tiramisu.
+
+
+```{r}
+#load your non missing dataset 
+load("stegen_nomissing.Rda")
+```
+
+
+```{r}
+# Check for interaction between tira and beer
+tirabeer <- glm(ill ~ tira*beer, 
+                data = tira.data,
+                family = binomial(link = "logit"))
+
+tirabeerop <- tidy(tirabeer, exponentiate = TRUE, conf.int = TRUE)
+tirabeerop
+```
+
+
+With the star symbol between tira and beer, we are telling *R* to include a factorial interaction. We have to be very careful when interpreting output, when we include an interaction.
+
+The odds ratio associated with “tira=yes” is no longer the comparison of those eating tiramisu and those not eating tiramisu. It is the effect of eating tiramisu when the effect of the other term in the interaction is at its reference value: beer=0. So among those who didn’t drink beer, the odds for eating tiramisu is 125 greater among ill than non-ill persons.
+
+Similiarly, among those who didn’t eat tiramisu, the odds of drinking beer is the same (OR=1, or 0.9956897) among the ill and non-ill. This means that drinking beer was not protective of illness, if no tiramisu was consumed.
+
+The interaction term is 0.3219. We can use this term to rebuild our stratification tables, as in Question 6.
+
+To obtain the association between drinking beer and being ill among those who didn’t eat tiramisu, we can use the odds ratio associated with beer=yes (OR=1, or 0.9956897). To obtain the association between drinking beer and being ill among those who ate tiramisu, we multiply the OR for beer with the interaction coefficient: $0.9956897 \times 0.3219$. We can use the *glht* function from the multcomp package for this, which makes obtaining the confidence intervals easier: 
+
+```{r, message=FALSE}
+#We can use names to extract the coefficient names 
+  # check with: names(coef(tirabeer)) 
+
+# linfct specifies the required combination:
+  #In this case we want beer and tira and beer:tira=0
+# The odds of illness among those who 
+  #drank beer and consumed tiramisu compared to those
+  #who consumed neither tiramisu nor beer
+
+a <- summary(glht(tirabeer, linfct = c("beerYes + tiraYes:beerYes = 0")))
+
+ci <- confint(a) 
+
+# Put together (cbind) a table with the exponent of the coefficients and CI, and p-value
+table_interact <- round(cbind(OR = exp(coef(a)),
+                       Interval = exp(ci$confint),
+                       Pvalue = a$test$pvalues),
+                       digits = 3)
+
+table_interact
+```
+
+
+Table I
+
+```{r, echo = F}
+
+
+kable( matrix( c(
+        "Tiramisu = Yes",	"", "OR", "95%CI", 
+        "", "BeerYes", "0.3205", "0.1-0.9", 
+        "", "BeerNo", "Reference", "", 
+        "", "", "", "",	 
+        "Tiramisu = No", "BeerYes", "0.3205", "0.1-0.9", 
+        "", "BeerNo", "Reference", ""
+), ncol = 4, byrow = T)
+)
+
+
+```
+
+In the above table, the interaction between eating tiramisu and drinking beer is equal to:
+0.3205 / 0.9957 = 0.3219
+This expresses by how much the OR for beer is multiplied when we go from Tira0 to Tira1.
+Note that these tables look different than the stratified analysis ones – we are using odds ratios, rather than risk ratios!
+
+Alternatively we could have stratified on beer rather than tira. We can use the following commands:
+
+```{r, message = F}
+a <- summary(glht(tirabeer, linfct = c("tiraYes + tiraYes:beerYes = 0")))
+
+ci <- confint(a) 
+
+# Put together (cbind) a table with the exponent of the coefficients and CI, and p-value
+table_interact <- round(cbind(OR = exp(coef(a)),
+                       Interval = exp(ci$confint),
+                       Pvalue = a$test$pvalues),
+                       digits = 3)
+
+table_interact
+```
+
+Table II 
+
+
+```{r, echo = F}
+
+kable( matrix( c(
+        "Beer = Yes",	"", "OR", "95%CI", 
+        "", "TiraYes", "40.2778", "10.4-155.3", 
+        "", "TiraNo", "Reference", "", 
+        "", "", "", "",	 
+        "Beer = No", "TiraYes", "125.125", "35.8-437.0", 
+        "", "TiraNo", "Reference", ""
+), ncol = 4, byrow = T)
+)
+```
+
+
+In the above table, the multiplicative interaction between drinking beer and eating tiramisu is AGAIN equal to:
+$40.2778 / 125.125 = 0.3219$
+
+An alternative table would be: 
+
+Table III 
+
+```{r, echo = F}
+
+kable( matrix( c(
+        "Tira",	"Beer", "Cases", "Controls", "OR", 
+        "1", "1", "25", "12", "40.1042",
+        "0", "1", "3", "58", "0.9957",
+        "1", "0", "52", "8", "125.125",
+        "0", "0", "4", "77", "Reference"
+), ncol = 5, byrow = T)
+)
+```
+
+
+<!---CHUNK_PAGEBREAK---> 
+
+**References**
+
+Rodriguez L and Kirkwood B: Case-control designs in the study of common diseases: updates on the demise of the rare disease assumption and the choice of sampling scheme for controls. Int J Epidemiol 1990; 19: 205-13
+
+Rothman KJ: Epidemiology. An introduction. Oxford University Press2002. P 74ff
+
+Hosmer and Lesmeshow: Applied logistic regression. Wiley Inter Science, John Willey & Sons, 1989.
+
+Svend Juul: An introduction to Stata for Health Researchers. Stata Press, Stata Corp LP.
+
+Hauri A.M et al. An outbreak of Salmonella Enteritidis gastroenteritis following tiramisu consumption at a high school graduation ceremony, Germany, June 1998.
+
+Nguyen TM, Ilef D, Jarraud S et al. A community-wide outbreak of legionnaires disease linked to industrial cooling towers--how far can contaminated aerosols spread? J Infect Dis.  2006; 193(1):102-111.
+
+Nguyen TM, Ganiayre F, Lapidus N et al  Enquête cas-témoins de cas groupés communautaires de légionellose, Pas-de-Calais, France, novembre 2003 - janvier 2004  BEH 2006 ;36-37 :181-182.
+
+Lectures
+
+- Study design: EPIET lecture notes 
+- Confounding and effect modification: EPIET lecture notes 
+- Logistic regression: EPIET lecture notes 
+- David Prieto lectures, EPIET, 2006 
+- Rachid Salmi lectures, University Victor  Segalene, Bordeaux, EPIET course 2002-4. 
+- Jean Claude Desenclos lectures, EPIET, 2002-2004 
+- Thomas Grein Lectures EPIET, 2002-2004 
+- Alain Moren lectures, EPIET & Epiconcept, 2005-2007
