@@ -10,3 +10,4 @@ The following files are included:
 - *stegen_check.R*: Clean R-script for data checking 
 - *stegen_gen_stegen1.R*: Clean R-script for generating cleaned *stegen1.Rda* dataset
 - *stegen_descrip.R*: Clean R-script for descriptive analysis 
+- *stegen_crude.R*: Clean R-script for crude analysis
