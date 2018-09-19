@@ -138,7 +138,10 @@ CS(tira.data, "tira", "ill")
 vars <- c("agegroup", "sex", "tira", "wmousse", "dmousse", "mousse", 
           "beer", "redjelly", "fruitsalad", "tomato", "mince", 
           "salmon", "horseradish", "chickenwin", "roastbeef", "pork")
-  
+
+# for each defined variable
+# print the name on screen 
+# print a table
 for (var in vars) {
   print(var)
   print(CS(tira.data, var, "ill"))
