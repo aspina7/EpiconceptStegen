@@ -20,7 +20,7 @@ tira.data$agegroup <- ifelse(tira.data$age >= 30, 1, 0 )
 
 #create labels for the agegroup variable 
 tira.data$agegroup <- factor(tira.data$agegroup, 
-                             levels = c(1, 0), 
+                             levels = c(0, 1), 
                              labels = c("0-29", 
                                         "30+"))
 
@@ -44,8 +44,8 @@ tira.data$pork[tira.data$pork == 9] <- NA
 #for sex 
 
 tira.data$sex <- factor(tira.data$sex, 
-                        levels = c(1, 0), 
-                        labels = c("male", "female"))
+                        levels = c(0, 1), 
+                        labels = c("female", "male"))
 
 
 
@@ -62,8 +62,8 @@ for (var in vars) {
   #select the column of tira.data in square brackets
   #overwrite with a factor as above
   tira.data[ , var] <- factor(tira.data[ , var], 
-                              levels = c(1, 0), 
-                              labels = c("Yes", "No")
+                              levels = c(0, 1), 
+                              labels = c("No", "Yes")
   )
 }
 
@@ -100,7 +100,7 @@ tira.data$dateonset <- as.Date(tira.data$dateonset, format = "%d.%m.%Y")
 #### Rearranging the order of variables #### 
 
 tira.data <- tira.data[ , c("uniquekey", "dateonset", "ill", 
-                            names(tira.data)[c(3:11, 13:21)]
+                            names(tira.data)[c(3:11, 13:ncol(tira.data))]
                             )
                         ]
 
