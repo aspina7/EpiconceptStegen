@@ -475,6 +475,8 @@ for (var in vars) {
 ```
 
 
+<!---CHUNK_PAGEBREAK---> 
+
 ### R-scripts
 
 You may also want to develop an R-script in which you will keep all relevant commands and annotate / comment each step of your analysis. 
@@ -704,7 +706,7 @@ Alternatively you could use the *EpiStats* package written by Epiconcept.
 # Install the package if you have not done this yet
 install.packages("EpiStats")
 ```
-```{r}
+```{r, message = F}
 # Load the package to this session 
 library(EpiStats)
 ```
@@ -747,6 +749,9 @@ attack.rate(exposure = "tira",
             outcome = "ill", data = tira.data, 
             rowcol = "rows")
 ```
+
+
+<!---CHUNK_PAGEBREAK---> 
 
 
 ## Help Q5d) Compute attributable risk % among exposed
@@ -1057,7 +1062,7 @@ For categorical variables, *R* will automatically take the lowest value as the r
 
 
 ```{r, message = FALSE}
-# Here we specify that tportion is a factor variable
+# Here we use tportion a factor variable
 model3 <- glm(ill~tportion, 
               data = tira.data,
               family = binomial(link = "logit"))
@@ -1235,10 +1240,7 @@ kable( matrix( c(
 
 <!---CHUNK_PAGEBREAK---> 
 
-In addition the **glht** function from the **multcomp** package, if typed after the logistic command, will give you the constant term for the entire model (linear combinations). It reflects the odds of disease when all exposures are equal to 0 (note that here the OR is not the OR for the constant but the odds of disease when not exposed to any of the factors).
-
-
-
+You can extract each term individually by using the "\$" sign. For example you could extract the constant (or intercept)  for the entire model. It reflects the odds of disease when all exposures are equal to 0 (note that here the OR is not the OR for the constant but the odds of disease when not exposed to any of the factors).
 
 **Additional** 
 In order to predict probability of outcome according to specific exposures you can use the following predict command:
@@ -1252,8 +1254,17 @@ model7 <- glm(ill ~ sex + tportion + mousse + beer + fruitsalad +
                  data = tira.data,
                  family = binomial(link = "logit"))
 
-
-predict(model7, type = "response")
+# 
+# newdata1 <- with(tira.data, data.frame(ill = mean(ill), gpa = mean(gpa), rank = factor(1:4)))
+# 
+# ## view data frame
+# newdata1
+# 
+# newdata1$rankP <- predict(mylogit, newdata = newdata1, type = "response")
+# newdata1
+# 
+# 
+# predict(model7)
 ```
 
 
@@ -1299,6 +1310,20 @@ Similiarly, among those who didn’t eat tiramisu, the odds of drinking beer is 
 The interaction term is 0.3219. We can use this term to rebuild our stratification tables, as in Question 6.
 
 To obtain the association between drinking beer and being ill among those who didn’t eat tiramisu, we can use the odds ratio associated with beer=yes (OR=1, or 0.9956897). To obtain the association between drinking beer and being ill among those who ate tiramisu, we multiply the OR for beer with the interaction coefficient: $0.9956897 \times 0.3219$. We can use the *glht* function from the multcomp package for this, which makes obtaining the confidence intervals easier: 
+
+```{r, eval = F}
+
+#install the multcomp function if you dont have it already 
+install.packages("multcomp")
+
+```
+```{r, message = F}
+#load multcomp package to this session 
+library(multcomp)
+```
+
+
+
 
 ```{r, message=FALSE}
 #We can use names to extract the coefficient names 
