@@ -2,7 +2,11 @@
 
 **Source:** 
 
-This case study was first designed by Esther Kissling, EpiConcept, 2016; it was then translated in to *R* by Alexander Spina in 2018. It is based on surveillance data from an anonymous country.  
+This case study was first designed by Alain Moren and Gilles Desve, EPIET. It is based on an investigation conducted by Anja Hauri, RKI, Berlin, 1998
+
+
+Minor revisions were brought to this case study by IntoEpi 2009,2010, Hong Kong 2016
+It was then translated in to *R* by Alexander Spina in 2018. 
 
 **Revisions:** 
 
